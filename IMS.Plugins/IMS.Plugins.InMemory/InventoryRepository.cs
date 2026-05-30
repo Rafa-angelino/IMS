@@ -1,0 +1,77 @@
+﻿using IMS.CoreBusiness;
+using IMS.UseCases.PluginInterfaces;
+
+namespace IMS.Plugins.InMemory
+{
+    public class InventoryRepository : IInventoryRepository
+    {
+        private readonly List<Inventory> _inventories;
+
+        public InventoryRepository()
+        {
+            _inventories =
+            [
+                new() { InventoryId = 1, InventoryName = "Bike1", Quantity = 10, Price = 100 },
+                new() { InventoryId = 2, InventoryName = "Bike2", Quantity = 20, Price = 200 },
+                new() { InventoryId = 3, InventoryName = "Bike3", Quantity = 30, Price = 300 },
+            ];
+        }
+
+        public Task AddInventoryAsync(Inventory inventory)
+        {
+            if (_inventories.Any(x => x.InventoryName.Equals(inventory.InventoryName, StringComparison.OrdinalIgnoreCase)))
+            {
+                return Task.CompletedTask;
+            }
+
+            var maxId = _inventories.Count != 0 ? _inventories.Max(x => x.InventoryId) : 0;
+
+            inventory.InventoryId = maxId + 1;  
+
+            _inventories.Add(inventory);
+            return Task.CompletedTask;  
+        }
+
+        public Task DeleteInventoryAsync(int inventoryId)
+        {
+            var inventory = _inventories.FirstOrDefault(i => i.InventoryId == inventoryId);
+            if (inventory != null)
+            {
+                _inventories.Remove(inventory);
+            }
+            return Task.CompletedTask;
+        }
+
+        public async Task<Inventory?> GetInvenryByIdAsync(int inventoryId)
+        {
+            return await Task.FromResult(_inventories.FirstOrDefault(i => i.InventoryId == inventoryId));   
+
+        }
+
+        public async Task<IEnumerable<Inventory>> GetInventoriesByNameAsync(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return await Task.FromResult(_inventories);
+
+            return _inventories.Where(i => i.InventoryName.Contains(name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public Task UpdateInventoryAsync(Inventory inventory)
+        {
+            if(_inventories.Any(x => x.InventoryId != inventory.InventoryId &&
+                x.InventoryName.Equals(inventory.InventoryName, StringComparison.OrdinalIgnoreCase)))
+            {
+                return Task.CompletedTask;
+            }
+
+            var invToUpdate = _inventories.FirstOrDefault(x => x.InventoryId == inventory.InventoryId);
+
+            if (invToUpdate != null)
+            {
+                invToUpdate.InventoryName = inventory.InventoryName;
+                invToUpdate.Quantity = inventory.Quantity;
+                invToUpdate.Price = inventory.Price;
+            }
+           return Task.CompletedTask;
+        }
+    }
+}

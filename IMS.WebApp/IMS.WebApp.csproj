@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IMS.CoreBusiness\IMS.CoreBusiness.csproj" />
+    <ProjectReference Include="..\IMS.Plugins\IMS.Plugins.InMemory\IMS.Plugins.InMemory.csproj" />
+    <ProjectReference Include="..\IMS.UseCases\IMS.UseCases.csproj" />
+  </ItemGroup>
+
+</Project>

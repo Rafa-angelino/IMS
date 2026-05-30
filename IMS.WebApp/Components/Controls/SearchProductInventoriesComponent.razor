@@ -1,0 +1,56 @@
+﻿@inject IViewInventoriesByNameUseCase ViewInventoriesByNameUseCase;
+
+<div class="input-group">
+    <input class="form-control"
+               placeholder="Type something to Search"
+               @bind-value="searchFilter" @bind-value:event="oninput" />
+    <button type="button" class="btn btn-success input-group-text" @onclick="HandleSearch">Search</button>
+</div>
+@if (inventories is not null && inventories.Count > 0)
+{
+    <div class="search-result">
+        <ul>
+            @foreach (var inventory in inventories)
+            {
+                <li @key="inventory.InventoryId"
+                    @onclick="() =>  { HandleSelectInventory(inventory); }">
+                    <strong>@inventory.InventoryName</strong>
+                </li>
+            }
+        </ul>
+    </div>
+    
+}
+
+@code {
+    [Parameter]
+    public EventCallback<Inventory> OnInventorySelected { get; set; }
+     
+    //[SupplyParameterFromForm] not needed here because we are using InteractiveServer rendering mode, which allows for two-way data binding without the need for form submission. The searchFilter property will automatically update as the user types in the input field, and we can trigger the search action whenever needed (e.g., on button click or input change).
+    private string _searchFilter;
+
+    private string searchFilter {
+        get => _searchFilter;    
+        set
+        {
+            if (_searchFilter == value) return; // Check if the new value is different from the current value to avoid unnecessary search actions when the user types the same character repeatedly or when the input field is cleared.)
+            _searchFilter = value;
+            HandleSearch(); // Trigger the search action whenever the search filter changes, allowing for real-time search results as the user types.
+        }
+    } //two way data binding for the search input field to hold the current search term and update in the user interface as the user types.
+    private List<Inventory> inventories = new List<Inventory>(); //list to hold the search results, which will be updated based on the search term entered by the user.
+
+    private async Task HandleSearch()
+    {
+        inventories = (await ViewInventoriesByNameUseCase.ExecuteAsync(this.searchFilter)).ToList();
+
+        StateHasChanged(); // Notify the component that the state has changed, prompting a re-render to display the updated search results.
+    }
+
+    private async Task HandleSelectInventory(Inventory inventory)
+    {
+        await OnInventorySelected.InvokeAsync(inventory); // Invoke the event callback to notify the parent component that an inventory has been selected, passing the selected inventory as an argument.
+        inventories.Clear(); // Clear the search results after an inventory is selected, which can help to reset the search state and prepare for a new search if needed.
+    }
+
+}

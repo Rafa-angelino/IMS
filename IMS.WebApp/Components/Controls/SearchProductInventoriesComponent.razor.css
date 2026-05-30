@@ -1,0 +1,13 @@
+﻿.search-result {
+    overflow-y: auto;
+    max-height: 200px;
+    border: 1px solid #ccc;
+    padding: 5px;
+}
+
+div ul {
+    list-style-type: none;
+}
+div ul li {
+    cursor: pointer;
+}

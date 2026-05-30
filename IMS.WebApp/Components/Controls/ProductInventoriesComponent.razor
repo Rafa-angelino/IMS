@@ -1,0 +1,45 @@
+﻿<SearchProductInventoriesComponent OnInventorySelected="HandleInventorySelected"></SearchProductInventoriesComponent>
+@if (this.Product is not null &&
+     this.Product.ProductInventories is not null &&
+     this.Product.ProductInventories.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var prodInv in this.Product.ProductInventories)
+            {
+                <tr>
+                    <td>@prodInv.Inventory?.InventoryName</td>
+                    <td>
+                        <input type="number" min="0" @bind-value="prodInv.InventoryQuantity" />
+                    </td>
+                    <td>
+                        <button class="btn btn-link"
+                            @onclick="() => RemoveInventory(prodInv)">
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    [Parameter]
+    public Product? Product { get; set; }
+
+    private void RemoveInventory(ProductInventory productInventory)
+    {
+        this.Product?.RemoveInventory(productInventory);
+    }
+
+    private void HandleInventorySelected(Inventory inventory)
+    {
+        this.Product?.AddInventory(inventory); // Add the selected inventory to the product with an initial quantity of 0. This allows the user to specify the quantity for the inventory after it has been added to the product.
+    }
+}
