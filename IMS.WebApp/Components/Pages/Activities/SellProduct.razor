@@ -1,23 +1,23 @@
-﻿@page "/produce"
+﻿@page "/sell"
 @rendermode InteractiveServer
 
 @inject IJSRuntime JsRuntime
 
 @inject IViewProductsByNameUseCase ViewProductsByNameUseCase
 @inject IViewProductByIdUseCase ViewProductByIdUseCase
-@inject IProduceProductUseCase ProduceProductUseCase
+@inject ISellProductUseCase SellProductUseCase
 
-<h3>Produce Product</h3>
+<h3>sell Product</h3>
 
 <br />
 
-<EditForm id="produce-form" Model="produceViewModel" OnValidSubmit="Produce">
+<EditForm id="sell-form" Model="sellProductViewModel" OnValidSubmit="Sell">
     <DataAnnotationsValidator></DataAnnotationsValidator>
     <ValidationSummary></ValidationSummary>
 
     <div class="form-group">
-        <label for="po">Production Number #</label>
-        <InputText id="po" class="form-control" @bind-Value="produceViewModel.ProductionNumber" />
+        <label for="po">Sales Number #</label>
+        <InputText id="po" class="form-control" @bind-Value="sellProductViewModel.SalesOrderNumber" />
     </div>
 
     <br />
@@ -25,7 +25,7 @@
     <div class="card">
         <div class="card-body">
             <div class="form-group">
-                <AutoCompleteComponent Label="Product To Produce"
+                <AutoCompleteComponent Label="Product To sell"
                                        SearchFunc="SearchProduct"
                                        OnItemSelected="HandleItemSelected" />
                 
@@ -37,16 +37,21 @@
 
     <div class="form-group">
         <label for="qty">Quantity #</label>
-        <InputNumber id="qty" class="form-control" @bind-Value="produceViewModel.QuantityToProduce" />
+        <InputNumber id="qty" class="form-control" @bind-Value="sellProductViewModel.QuantityToSell" />
     </div>
     <br />
-    <button type="submit" class="btn btn-primary">Produce</button>
+    <div class="form-group">
+        <label for="price">Unit Price</label>
+        <InputNumber id="price" class="form-control" @bind-Value="sellProductViewModel.UnitPrice" />
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary">Sell</button>
 
     
 </EditForm>
 
 @code {
-    private ProduceViewModel produceViewModel = new();
+    private SellProductViewModel sellProductViewModel = new();
     private Product? selectedProduct;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -55,7 +60,7 @@
 
         if (firstRender)
         {
-            await JsRuntime.InvokeVoidAsync("preventFormSubmission", "produce-form");  //file wwwroot/jsinterop. Has to insert the script tag reference in the App.razor
+            await JsRuntime.InvokeVoidAsync("preventFormSubmission", "sell-form");  //file wwwroot/jsinterop. Has to insert the script tag reference in the App.razor
             // var linkUrl = await JsRuntime.GetValueAsync<string>("document.location.href");
             // await JsRuntime.SetValueAsync("document.title", $"{linkUrl} - purchase inventory");
         }
@@ -79,27 +84,29 @@
 
         if (selectedProduct is not null)
         {
-            this.produceViewModel.ProductId = item.Id;
-            produceViewModel.Product = selectedProduct;
+            this.sellProductViewModel.ProductId = item.Id;
+            sellProductViewModel.Product = selectedProduct;
+            this.sellProductViewModel.UnitPrice = selectedProduct.Price;
 
         }
 
 
     }
 
-    private async Task Produce()
+    private async Task Sell()
     {
         if (selectedProduct is not null)
         {
             
-            await ProduceProductUseCase.ExecuteAsync(
-            this.produceViewModel.ProductionNumber,
+            await SellProductUseCase.ExecuteAsync(
+            this.sellProductViewModel.SalesOrderNumber,
             selectedProduct,
-            this.produceViewModel.QuantityToProduce,
+            this.sellProductViewModel.QuantityToSell,
+            selectedProduct.Price,
             "Rafael"
             );
 
-            this.produceViewModel = new();
+            this.sellProductViewModel = new();
             this.selectedProduct = null;
         }
         

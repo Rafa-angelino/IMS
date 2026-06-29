@@ -34,7 +34,7 @@
     public string Label { get; set; } = string.Empty;
 
     [Parameter]
-    public Func<string, List<ItemViewModel>>? SearchFunc { get; set; }
+    public Func<string, Task<List<ItemViewModel>>>? SearchFunc { get; set; }
 
 
     [Parameter]
@@ -52,9 +52,19 @@
             _userInput = value;
             if (!string.IsNullOrWhiteSpace(_userInput) && SearchFunc is not null)
             {
-                _searchResults = SearchFunc(_userInput);
+                ViewItemsAsync();
             }
         } 
+    }
+
+    private async Task ViewItemsAsync()
+    {
+        if (SearchFunc != null)
+        {
+            _searchResults = await SearchFunc(_userInput);
+
+            StateHasChanged();
+        }
     }
 
     private void HandleSelectItem(ItemViewModel? item)
